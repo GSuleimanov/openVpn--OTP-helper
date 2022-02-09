@@ -1,0 +1,4 @@
+.vscode
+**/__pycache__/
+vpn_configs/*
+!vpn_configs/example
