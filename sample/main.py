@@ -1,30 +1,17 @@
 #!/usr/bin/env python3
 
-import sys, logging
-from model import Profile, Credentials
-from vpn import OpenVpn
+from model import Profile, OpenVpn, Pool
+import argparse
+import logging
 
-logging.basicConfig(level=logging.INFO)
-
-
-def checkArgs(args):
-        if len(args) == 2 and args[1] == 'list':
-            return None, args[1]
-        if len(args) < 3:
-            raise ValueError('Insufficient arguments! You must specify \"ini\"-filename and mode (on/off/list)')
-        elif not Profile(args[1]).exists():
-            raise ValueError(f'Such configuration not found > {args[1]}.ini')
-        elif args[2] not in ['on', 'off', 'list']:
-            raise ValueError('You must specify execution mode (on/off/list)')
-        else: return args[1], args[2]
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s]: %(message)s")
 
 
 if __name__ == '__main__':
-    profilename, mode = checkArgs(sys.argv)
-    if mode == 'list':
-        OpenVpn.printSessions()
-    else:
-        creds = Credentials(profilename)
-        vpn = OpenVpn(creds)
-        if mode == "off": vpn.stopAll()
-        elif mode == "on": vpn.start()
+    parser = argparse.ArgumentParser(description="script that helps with otp-code entering routine")
+    parser.add_argument("mode", choices=["ls", "on", "off"])
+    parser.add_argument("config", choices=Pool.get_profile_names(), nargs="?", default="example")
+    args = parser.parse_args()
+
+    profile = Profile(args.config)
+    OpenVpn.do(args.mode, profile)
